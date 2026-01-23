@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build Output
+dist/
+
+# Testing
+coverage/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Project Specific
+.opencode/
+.sisyphus/

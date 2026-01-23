@@ -1,0 +1,47 @@
+{
+  "name": "omo-switch-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for managing oh-my-opencode profiles",
+  "main": "dist/index.js",
+  "bin": {
+    "omo-switch": "dist/index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "cli",
+    "omo",
+    "opencode",
+    "oh-my-opencode",
+    "config-manager",
+    "omo-switch"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "json5": "^2.2.3",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^4.0.17",
+    "memfs": "^4.56.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.17"
+  }
+}
