@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { ProjectRc } from "./types";
+import { cleanOldBackups } from "../utils/backup-cleaner";
 import {
   getProjectConfigsPath,
   getProjectTargetPath,
@@ -149,6 +150,10 @@ export class ProjectStoreManager {
     if (!fs.existsSync(this.backupsPath)) {
       fs.mkdirSync(this.backupsPath, { recursive: true });
     }
+
+    // Clean up old backups before creating new one
+    cleanOldBackups(this.backupsPath);
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupFileName = `${timestamp}__${path.basename(configPath)}`;
     const backupPath = path.join(this.backupsPath, backupFileName);

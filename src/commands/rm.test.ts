@@ -96,6 +96,30 @@ vi.mock("../store", () => {
         return [];
       }
     },
+    SettingsManager: class {
+      getEffectiveType() {
+        return "omo";
+      }
+      loadSettings() {
+        return { type: "omo" };
+      }
+      isProjectOverride() {
+        return false;
+      }
+    },
+    OmosConfigManager: class {
+      constructor() {}
+      getPreset() {
+        return null;
+      }
+      removePreset() {
+        return true;
+      }
+      getActivePreset() {
+        return null;
+      }
+      setActivePreset() {}
+    },
     __createdStoreInstances,
     __createdProjectStoreInstances,
   };

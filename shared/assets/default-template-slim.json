@@ -1,0 +1,13 @@
+{
+  "preset": "zen-free",
+  "presets": {
+    "zen-free": {
+      "orchestrator": { "model": "opencode/big-pickle" },
+      "oracle": { "model": "opencode/big-pickle" },
+      "librarian": { "model": "opencode/big-pickle" },
+      "explorer": { "model": "opencode/big-pickle" },
+      "designer": { "model": "opencode/big-pickle" },
+      "fixer": { "model": "opencode/big-pickle" }
+    }
+  }
+}
