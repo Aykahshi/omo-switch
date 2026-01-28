@@ -4,7 +4,8 @@
   "description": "CLI tool for managing oh-my-opencode profiles",
   "main": "dist/index.js",
   "bin": {
-    "omo-switch": "dist/index.js"
+    "omo-switch": "dist/index.js",
+    "omos": "dist/index.js"
   },
   "engines": {
     "node": ">=22"
