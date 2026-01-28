@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import { ProjectRc } from "./types";
+import { cleanOldBackups } from "../utils/backup-cleaner";
+import { SettingsManager } from "./settings-manager";
 import {
   getProjectConfigsPath,
   getProjectTargetPath,
@@ -149,6 +151,12 @@ export class ProjectStoreManager {
     if (!fs.existsSync(this.backupsPath)) {
       fs.mkdirSync(this.backupsPath, { recursive: true });
     }
+
+    // Clean up old backups before creating new one
+    const settings = new SettingsManager();
+    const retentionDays = settings.loadSettings().backupRetentionDays;
+    cleanOldBackups(this.backupsPath, retentionDays);
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupFileName = `${timestamp}__${path.basename(configPath)}`;
     const backupPath = path.join(this.backupsPath, backupFileName);

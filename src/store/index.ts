@@ -2,9 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { Profile, StoreIndex, STORE_VERSION } from "./types";
+import { cleanOldBackups } from "../utils/backup-cleaner";
+import { SettingsManager } from "./settings-manager";
 
 export * from "./types";
 export { ProjectStoreManager } from "./project-store";
+export { OmosConfigManager } from "./omos-config";
+export { SettingsManager } from "./settings-manager";
 
 export class StoreManager {
   private readonly storePath: string;
@@ -117,6 +121,12 @@ export class StoreManager {
     if (!fs.existsSync(configPath)) {
       return null;
     }
+
+    // Clean up old backups before creating new one
+    const settings = new SettingsManager();
+    const retentionDays = settings.loadSettings().backupRetentionDays;
+    cleanOldBackups(this.backupsPath, retentionDays);
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupFileName = `${timestamp}__${path.basename(configPath)}`;
     const backupPath = path.join(this.backupsPath, backupFileName);

@@ -5,6 +5,17 @@ vi.mock("../store", async () => {
   const actual = await vi.importActual<typeof import("../store")>("../store");
   return {
     ...actual,
+    SettingsManager: class {
+      getEffectiveType() {
+        return "omo";
+      }
+      loadSettings() {
+        return { type: "omo" };
+      }
+      isProjectOverride() {
+        return false;
+      }
+    },
   };
 });
 
@@ -107,7 +118,8 @@ describe("listCommand", () => {
     runList({ scope: "user" });
 
     expect(Table).toHaveBeenCalled();
-    expect(findProjectRoot).not.toHaveBeenCalled();
+    // findProjectRoot is now called for SettingsManager.getEffectiveType check
+    expect(findProjectRoot).toHaveBeenCalled();
   });
 
   it("lists project profiles when .opencode directory exists", () => {

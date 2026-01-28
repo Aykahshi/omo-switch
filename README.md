@@ -9,6 +9,11 @@
 
 A CLI tool for managing [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) configuration profiles.
 
+## Why omo-switch?
+
+**Why not just use `ocx`?**
+When you need a simple, lightweight tool dedicated purely to switching between different configurations for `oh-my-opencode` or `oh-my-opencode-slim`, `omo-switch` is your best friend. It doesn't try to do everything; it focuses on making config management as easy as a single command. It's built for developers who want a straightforward way to swap setups without the overhead of more complex orchestration tools.
+
 ## Features
 
 - 🔄 **Profile Switching** - Seamlessly switch between multiple `oh-my-opencode` configurations
@@ -16,6 +21,8 @@ A CLI tool for managing [oh-my-opencode](https://github.com/code-yeongyu/oh-my-o
 - 📦 **Dual Scope Support** - Manage both global (`user`) and project-local (`project`) profiles
 - 💾 **Automatic Backups** - Your configuration is always backed up before changes
 - 🖥️ **Cross-Platform** - Works on Windows (PowerShell/CMD), Linux, and macOS (XDG compatible)
+
+- 🔀 **Dual Mode Support** - Seamlessly switch between `oh-my-opencode` (OMO) and `oh-my-opencode-slim` (SLIM) configurations
 
 ## Requirements
 
@@ -28,6 +35,8 @@ A CLI tool for managing [oh-my-opencode](https://github.com/code-yeongyu/oh-my-o
 ```bash
 npm install -g omo-switch-cli
 ```
+
+**Note:** You can also use the shorter alias `omos` after installation.
 
 ### From Source
 
@@ -72,6 +81,45 @@ omo-switch init
 
 ---
 
+### `type [type]`
+
+Get or set the active configuration type (`omo` or `slim`). This determines how `omo-switch` interprets your configuration and where it applies changes.
+
+```bash
+# Show current type and scope overrides
+omo-switch type
+
+# Set global type to SLIM (uses oh-my-opencode-slim.json)
+omo-switch type slim
+
+# Set global type to OMO (uses oh-my-opencode.jsonc)
+omo-switch type omo
+
+# Set project-specific type override (creates .opencode/settings.json)
+omo-switch type slim --scope project
+
+# Clear project-specific override
+omo-switch type --clear-project
+
+# Interactive selection
+omo-switch type --select
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--scope <scope>` | Target scope: `user` (global) or `project` (local) |
+| `--select` | Interactively select from available types |
+| `--clear-project` | Remove project-level override to use global default |
+
+**Configuration Types:**
+| Type | Description | File Pattern |
+|------|-------------|--------------|
+| `omo` | **Classic Mode** (Default) - Uses multiple profile files. | `oh-my-opencode.jsonc` |
+| `slim` | **Slim Mode** - Uses a single file with multiple presets. | `oh-my-opencode-slim.json` |
+
+---
+
 ### `add <file>`
 
 Imports a configuration file as a new profile.
@@ -89,9 +137,6 @@ omo-switch add ./config.json --id dev --name "Dev Config"
 # Add to project scope instead of global
 omo-switch add ./config.jsonc --scope project
 
-# Import and immediately activate
-omo-switch add ./config.jsonc --activate
-
 # Overwrite existing profile with same ID
 omo-switch add ./config.jsonc --id existing-id --force
 ```
@@ -102,8 +147,10 @@ omo-switch add ./config.jsonc --id existing-id --force
 | `--id <id>` | Custom profile ID (defaults to derived from name or filename) |
 | `--name <name>` | Custom display name (defaults to ID) |
 | `--scope <scope>` | Target scope: `user` (global) or `project` (local). Prompts if not specified |
-| `--activate` | Apply the profile immediately after adding |
 | `--force` | Overwrite if a profile with the same ID exists |
+
+OMOS behavior:
+- When the active type is `slim`, `add` will insert the imported configuration as a new preset under the `presets` object inside `oh-my-opencode-slim.json` instead of creating a separate profile file.
 
 **Profile ID and filename:**
 - If neither `--id` nor `--name` is provided: ID is derived from the input filename
@@ -133,6 +180,9 @@ omo-switch list --scope project
 |--------|-------------|
 | `--scope <scope>` | Filter by scope: `user`, `project`, or `all` (default: `all`) |
 
+OMOS behavior:
+- In `slim` mode, `list` displays available presets from the `presets` object inside `oh-my-opencode-slim.json` and indicates the currently selected `preset`.
+
 ---
 
 ### `show [identifier]`
@@ -160,6 +210,9 @@ omo-switch show dev --scope project
 - `user`: Shows a profile from the global store
 - `project`: Shows a profile from the project store
 
+OMOS behavior:
+- When in `slim` mode, `show` will display the OMOS single-file configuration (`oh-my-opencode-slim.json`) or a specific preset from its `presets` object when an identifier is provided.
+
 ---
 
 ### `apply <identifier>`
@@ -183,6 +236,9 @@ omo-switch apply dev --scope project
 | `--scope <scope>` | Target scope: `user` or `project` (default: `user`) |
 
 **Note:** A backup is automatically created before any changes.
+
+OMOS behavior:
+- In `slim` mode, `apply` sets the `preset` field inside `oh-my-opencode-slim.json` to the selected preset ID instead of copying a profile file.
 
 ---
 
@@ -211,6 +267,9 @@ omo-switch rm dev --scope project
 - Checks project scope first, then global scope
 - Prompts for confirmation before deletion
 
+OMOS behavior:
+- When in `slim` mode, `rm` removes the corresponding preset from the `presets` object inside `oh-my-opencode-slim.json`.
+
 ---
 
 ### `schema refresh`
@@ -232,14 +291,47 @@ omo-switch schema refresh --offline
 
 ---
 
+## OMO vs OMOS Modes
+
+`omo-switch` supports two configuration formats:
+
+### OMO Mode (oh-my-opencode)
+- **Multi-file architecture**: Each profile is stored as a separate `.json` or `.jsonc` file
+- **Profile switching**: Copy selected profile to target configuration path
+- **Best for**: Users who want isolated, independent profile files
+
+### OMOS Mode (oh-my-opencode-slim)  
+- **Single-file architecture**: All presets are managed within a single `oh-my-opencode-slim.json` file.
+- **Preset switching**: Switching is done by modifying the `preset` field at the top level of the file.
+- **Best for**: Users who prefer a unified configuration and want to switch "on-the-fly" without copying files.
+- **Usage**: Set your type to `slim` using `omo-switch type slim`.
+
+#### Working with Slim Mode:
+1. **List Presets**: `omo-switch list` shows all presets defined in your slim config.
+2. **Add Preset**: `omo-switch add ./my-preset.json` reads a JSON file containing a preset definition and appends it to the `presets` object in your slim config.
+3. **Apply Preset**: `omo-switch apply preset-id` updates the `preset` field in the slim config to point to `preset-id`.
+
+### Command Behavior by Mode
+
+| Command | OMO Mode | OMOS Mode |
+|---------|----------|-----------|
+| `type` | Show/set current mode | Same |
+| `list` | List profile files | List presets in `presets` object |
+| `add` | Import file as new profile | Add preset to `presets` object |
+| `apply` | Copy profile to target path | Set `preset` field |
+| `rm` | Delete profile file | Remove preset from `presets` |
+| `show` | Display profile content | Display OMOS config |
+
+
 ## Understanding Scopes
 
 `omo-switch` supports two scopes for profile management:
 
 | Scope | Storage Location | Target Config Path | Use Case |
 |-------|------------------|-------------------|----------|
-| `user` | `~/.config/omo-switch/` | `~/.config/opencode/oh-my-opencode.jsonc` | Global profiles shared across all projects |
-| `project` | `<project>/.opencode/` | `<project>/.opencode/oh-my-opencode.jsonc` | Project-specific profiles, ideal for team sharing via Git |
+| `user` | `~/.config/omo-switch/` | `~/.config/opencode/oh-my-opencode.jsonc` (OMO) / `~/.config/opencode/oh-my-opencode-slim.json` (OMOS) | Global profiles/presets shared across all projects |
+| `project` | `<project>/.opencode/` | `<project>/.opencode/oh-my-opencode.jsonc` (OMO) / `<project>/.opencode/oh-my-opencode-slim.json` (OMOS) | Project-specific profiles/presets, ideal for team sharing via Git |
+
 
 ## Storage Structure
 
@@ -247,8 +339,8 @@ omo-switch schema refresh --offline
 
 ```
 ~/.config/omo-switch/
-├── index.json           # Profile registry with active profile ID
-├── configs/             # Profile configuration files (*.json, *.jsonc)
+├── index.json           # Profile registry with active profile ID (OMO)
+├── configs/             # Profile configuration files (*.json, *.jsonc) (OMO)
 ├── cache/
 │   └── schema/          # Cached oh-my-opencode.schema.json
 └── backups/             # Timestamped configuration backups
@@ -258,9 +350,10 @@ omo-switch schema refresh --offline
 
 ```
 <project>/.opencode/
-├── .omorc               # Project-specific active profile
-├── omo-configs/         # Project-specific profiles
-└── oh-my-opencode.jsonc # Applied project config (target)
+├── .omorc               # Project-specific active profile (OMO)
+├── omo-configs/         # Project-specific profiles (OMO)
+├── oh-my-opencode.jsonc # Applied project config (target) (OMO)
+└── oh-my-opencode-slim.json # Applied project config (target) (OMOS)
 ```
 
 ## Target Configuration Paths
@@ -269,9 +362,9 @@ When applying a profile, `omo-switch` writes to:
 
 | Scope | Platform | Primary Path | Fallback Path |
 |-------|----------|--------------|---------------|
-| `user` | Windows | `%USERPROFILE%\.config\opencode\oh-my-opencode.jsonc` | `%APPDATA%\opencode\oh-my-opencode.json` |
-| `user` | Linux/macOS | `$XDG_CONFIG_HOME/opencode/oh-my-opencode.jsonc` | `~/.config/opencode/oh-my-opencode.jsonc` |
-| `project` | All | `<project>/.opencode/oh-my-opencode.jsonc` | - |
+| `user` | Windows | `%USERPROFILE%\.config\opencode\oh-my-opencode.jsonc` (OMO) / `%USERPROFILE%\.config\opencode\oh-my-opencode-slim.json` (OMOS) | `%APPDATA%\opencode\oh-my-opencode.json` |
+| `user` | Linux/macOS | `$XDG_CONFIG_HOME/opencode/oh-my-opencode.jsonc` (OMO) / `$XDG_CONFIG_HOME/opencode/oh-my-opencode-slim.json` (OMOS) | `~/.config/opencode/oh-my-opencode.jsonc` |
+| `project` | All | `<project>/.opencode/oh-my-opencode.jsonc` (OMO) / `<project>/.opencode/oh-my-opencode-slim.json` (OMOS) | - |
 
 ## Local Development
 
@@ -355,9 +448,24 @@ Ensure your terminal has write permissions to:
 ### Finding Backups
 
 If something goes wrong, find your original configuration in:
+- **Global**: `~/.config/omo-switch/backups/<ISO_TIMESTAMP>__oh-my-opencode.jsonc`
+- **Project**: `<project>/.opencode/backups/<ISO_TIMESTAMP>__oh-my-opencode.jsonc`
+
+### Backup Retention Policy
+
+By default, `omo-switch` keeps backups for **30 days**. Old backup files are automatically scanned and removed whenever a new backup is created (e.g., when running `apply`).
+
+You can customize the retention period by editing your global `settings.json` file:
+
+**File**: `~/.config/omo-switch/settings.json`
+```json
+{
+  "activeType": "omo",
+  "backupRetentionDays": 14
+}
 ```
-~/.config/omo-switch/backups/<ISO_TIMESTAMP>__oh-my-opencode.jsonc
-```
+
+Set `backupRetentionDays` to a larger number to keep backups longer, or a smaller number to save space.
 
 ## License
 

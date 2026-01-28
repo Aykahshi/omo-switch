@@ -117,6 +117,31 @@ vi.mock("../store", () => {
           return [];
         }
       },
+      SettingsManager: class {
+        getEffectiveType() {
+          return "omo";
+        }
+        loadSettings() {
+          return { type: "omo" };
+        }
+        isProjectOverride() {
+          return false;
+        }
+      },
+      OmosConfigManager: class {
+        constructor() {}
+        getPreset() {
+          return null;
+        }
+        addPreset() {}
+        setActivePreset() {}
+        getActivePreset() {
+          return null;
+        }
+        createBackup() {
+          return null;
+        }
+      },
     __createdStoreInstances,
     __createdProjectStoreInstances,
    };
@@ -228,7 +253,7 @@ describe("addCommand", () => {
   // Helper function to invoke the add command with mocked action handler
   async function runAdd(
     file: string,
-    opts: { scope?: string; force?: boolean; activate?: boolean; id?: string } = {}
+    opts: { scope?: string; force?: boolean; id?: string } = {}
   ) {
     // Use the addCommand from scope (which has mocks applied)
     const cmd = addCommand as any;
@@ -245,10 +270,6 @@ describe("addCommand", () => {
     if (opts.force) {
       cmd._optionValues.force = true;
       cmd._optionValueSources.force = 'cli';
-    }
-    if (opts.activate) {
-      cmd._optionValues.activate = true;
-      cmd._optionValueSources.activate = 'cli';
     }
     if (opts.id) {
       cmd._optionValues.id = opts.id;
@@ -358,20 +379,6 @@ describe("addCommand", () => {
 
     expect(mockSpinner.fail).toHaveBeenCalled();
     expect(chalk.red).toHaveBeenCalledWith(expect.stringContaining("Only .json and .jsonc"));
-  });
-
-  it("activates profile when --activate flag is set", async () => {
-    vi.mocked(select).mockResolvedValue("user" as any);
-    vi.spyOn(StoreManagerClass.prototype, "loadIndex").mockReturnValue({
-      profiles: [],
-      activeProfileId: null,
-    });
-
-    await runAdd("/path/to/config.json", { activate: true, scope: "user" });
-
-    const inst3 = await lastStoreInstance();
-    const saveCall = vi.mocked(inst3.saveIndex).mock.calls[0][0];
-    expect(saveCall.activeProfileId).toBeTruthy();
   });
 
   it("overwrites existing profile when --force flag is set", async () => {
