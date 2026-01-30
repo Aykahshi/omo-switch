@@ -11,8 +11,9 @@ A CLI tool for managing [oh-my-opencode](https://github.com/code-yeongyu/oh-my-o
 
 ## Why omo-switch?
 
-**Why not just use `ocx`?**
-When you need a simple, lightweight tool dedicated purely to switching between different configurations for `oh-my-opencode` or `oh-my-opencode-slim`, `omo-switch` is your best friend. It doesn't try to do everything; it focuses on making config management as easy as a single command. It's built for developers who want a straightforward way to swap setups without the overhead of more complex orchestration tools.
+`omo-switch` is designed as a simple, lightweight tool dedicated purely to switching between different configurations for `oh-my-opencode` or `oh-my-opencode-slim`. It focuses on making profile management as easy as a single command, which is perfect for most daily development workflows.
+
+If you have more complex configuration needs or require advanced orchestration, we highly recommend using [ocx](https://github.com/kdcokenny/ocx). While `omo-switch` excels at direct profile swapping, `ocx` provides a more comprehensive set of tools for sophisticated setup management.
 
 ## Features
 
